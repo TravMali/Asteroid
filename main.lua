@@ -1,4 +1,4 @@
---Next step is to create bullet objects and mouse press functionality. Check for collisions between Bullets - Asteroids, Asteroids - Player
+--Next step is to mess with asteroids. Check for collisions between Bullets - Asteroids, Asteroids - Player
 
 --START SHIP
 local Ship = {mouseX=0, mouseY=0, health=1, shipVertices = {0,0,0,0,0,0}}
@@ -34,13 +34,17 @@ function Asteroid.createAsteroidShape()
 end
 --END ASTEROIDS
 asteroids = {} --List of asteroid objects
---Needs iterator
 
 --START BULLETS
+local Bullet = {x=0, y=0}
 
+function Bullet:new(locationX, locationY)
+    bullet = {x = locationX , y = locationY-15}
+    self.__index = self
+    return setmetatable(bullet, self)
+end
 --END BULLETS
 bullets = {} --List of bullet objects
---needs iterator
 
 --One time setup
 function love.load()
@@ -53,11 +57,20 @@ end
 --updates each frame
 function love.update()
     player:shipMouse()
+    if love.mouse.isDown(1) then
+        table.insert(bullets, Bullet:new(player.mouseX, player.mouseY))
+    end
+    for i = 1, #bullets do
+        bullets[i].y = bullets[i].y-1
+    end
 end
 
---Eventually need to use a table with a linked list+iterator to draw shapes...otherwise static asteroids
+--Draws objects in window
 function love.draw()
     love.graphics.setColor(1,1,0)
     love.graphics.polygon("line", player.shipVertices)
     love.graphics.circle("fill", aste.x, aste.y, 10, aste.shape)
+    for i = 1, #bullets do
+        love.graphics.circle("fill", bullets[i].x, bullets[i].y, 3)
+    end
 end
