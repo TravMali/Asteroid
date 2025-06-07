@@ -1,10 +1,11 @@
 --Next step is to mess with asteroids. Check for collisions between Bullets - Asteroids, Asteroids - Player
+--Finish collisions between bullets and asteroids next.
 
 --START SHIP
-local Ship = {mouseX=0, mouseY=0, health=1, shipVertices = {0,0,0,0,0,0}, shots = 0}
+local Ship = {mouseX=0, mouseY=0, health=1, shipVertices = {0,0,0,0,0,0}}
 
 function Ship:new()
-    ship = {mouseX, mouseY, health, shipVertices, shots}
+    ship = {mouseX, mouseY, health, shipVertices}
     self.__index = self
     return setmetatable(ship, self)
 end
@@ -61,6 +62,14 @@ end
 function love.update()
     player:shipMouse()
     bulletControl()
+    for i = 1, #bullets do
+        for j = 1, #asteroids do
+            if bulletAsteroidCollision(bullets[i], asteroids[j]) == true then
+                table.remove(bullets,i)
+                table.remove(asteroids,j)
+            end
+        end
+    end
     timer = timer + 1
 end
 
@@ -76,8 +85,8 @@ end
 --Controls for physics and interactions
 function bulletControl()
       if love.mouse.isDown(1) and shots > 0 then
+        shots = shots - 1
         table.insert(bullets, Bullet:new(player.mouseX, player.mouseY))
-    shots = shots - 1
     end
     for i = 1, #bullets do
         bullets[i].y = bullets[i].y-3
@@ -86,6 +95,16 @@ function bulletControl()
         shots = shots + 1
         timer = 0
     end
+end
+
+function bulletAsteroidCollision(a, b)  -- Returns true if the objects are colliding, false if not. 
+    
+    return false
+end
+
+function shipAsteroidCollision(sx,sy,ax,ay) -- Returns true if the objects are colliding, flase if not.
+
+    return false
 end
 --end controls for physics and interactions
 
