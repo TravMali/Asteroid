@@ -21,10 +21,10 @@ end
 --END SHIP
 
 --START ASTEROIDS
-local Asteroid = {x = 50, y = 50, shape = 0}
+local Asteroid = {x = 50, y = 50, radius = 10, shape = 0}
 
 function Asteroid:new()
-    asteroid = {x, y, shape = self.createAsteroidShape()}
+    asteroid = {x, y, radius, shape = self.createAsteroidShape()}
     self.__index = self
     return setmetatable(asteroid, self)
 end
@@ -62,6 +62,8 @@ end
 function love.update()
     player:shipMouse()
     bulletControl()
+    
+    --Checks bullets and asteroids for collisions. UNFINISHED.
     for i = 1, #bullets do
         for j = 1, #asteroids do
             if bulletAsteroidCollision(bullets[i], asteroids[j]) == true then
@@ -70,6 +72,7 @@ function love.update()
             end
         end
     end
+    
     timer = timer + 1
 end
 
@@ -77,7 +80,7 @@ end
 function love.draw()
     love.graphics.setColor(1,1,0)
     love.graphics.polygon("line", player.shipVertices)
-    love.graphics.circle("fill", aste.x, aste.y, 10, aste.shape)
+    love.graphics.circle("fill", aste.x, aste.y, aste.radius, aste.shape)
     drawBullets()
 end
 
