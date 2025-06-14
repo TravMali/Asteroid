@@ -51,7 +51,7 @@ bullets = {} --List of bullet objects
 --One time setup
 function love.load()
     love.mouse.setVisible(false)
-    aste = Asteroid:new()
+    table.insert(asteroids, Asteroid:new())
     player = Ship:new()
     player:shipMouse()
     shots = 1 -- Preloads one shot
@@ -64,15 +64,17 @@ function love.update()
     bulletControl()
     
     --Checks bullets and asteroids for collisions. UNFINISHED.
-    for i = 1, #bullets do
-        for j = 1, #asteroids do
-            if bulletAsteroidCollision(bullets[i], asteroids[j]) == true then
+    for i = #bullets, 1, -1 do
+        for j = #asteroids, 1, -1 do
+            if bulletAsteroidCollision(bullets[i], asteroids[j]) then
                 table.remove(bullets,i)
                 table.remove(asteroids,j)
+                break
             end
         end
     end
-    
+    --End bullet asteroid collisions
+
     timer = timer + 1
 end
 
@@ -80,7 +82,8 @@ end
 function love.draw()
     love.graphics.setColor(1,1,0)
     love.graphics.polygon("line", player.shipVertices)
-    love.graphics.circle("fill", aste.x, aste.y, aste.radius, aste.shape)
+    --love.graphics.circle("fill", aste.x, aste.y, aste.radius, aste.shape)
+    drawAsteroids()
     drawBullets()
 end
 
@@ -100,9 +103,19 @@ function bulletControl()
     end
 end
 
-function bulletAsteroidCollision(a, b)  -- Returns true if the objects are colliding, false if not. 
-    
-    return false
+function bulletAsteroidCollision(b, a)  -- Returns true if the objects are colliding, false if not. 
+    local dx = b.x - a.x
+    local dy = b.y - a.y
+    local distanceSquared = dx*dx + dy*dy
+
+    local sumRadii = 3 + a.radius
+    local sumRadiiSquared = sumRadii * sumRadii
+
+    if distanceSquared <= sumRadiiSquared then
+        return true
+    else return false 
+
+    end
 end
 
 function shipAsteroidCollision(sx,sy,ax,ay) -- Returns true if the objects are colliding, flase if not.
@@ -115,5 +128,11 @@ end
 function drawBullets()
     for i = 1, #bullets do
         love.graphics.circle("fill", bullets[i].x, bullets[i].y, 3)
+    end
+end
+
+function drawAsteroids()
+    for i = 1, #asteroids do
+        love.graphics.circle("fill", asteroids[i].x, asteroids[i].y, asteroids[i].radius)
     end
 end
