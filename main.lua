@@ -23,8 +23,8 @@ end
 --START ASTEROIDS
 local Asteroid = {x = 50, y = 50, radius = 10, shape = 0}
 
-function Asteroid:new()
-    asteroid = {x, y, radius, shape = self.createAsteroidShape()}
+function Asteroid:new(locationX, locationY, r)
+    asteroid = {x = locationX, y = locationY, radius = r, shape = self.createAsteroidShape()}
     self.__index = self
     return setmetatable(asteroid, self)
 end
@@ -51,7 +51,7 @@ bullets = {} --List of bullet objects
 --One time setup
 function love.load()
     love.mouse.setVisible(false)
-    table.insert(asteroids, Asteroid:new())
+    table.insert(asteroids, Asteroid:new(50,50,10))
     player = Ship:new()
     player:shipMouse()
     shots = 1 -- Preloads one shot
@@ -103,7 +103,8 @@ function bulletControl()
     end
 end
 
-function bulletAsteroidCollision(b, a)  -- Returns true if the objects are colliding, false if not. 
+--Checks for collisions between bullets and asteroids
+function bulletAsteroidCollision(b, a) 
     local dx = b.x - a.x
     local dy = b.y - a.y
     local distanceSquared = dx*dx + dy*dy
@@ -113,8 +114,8 @@ function bulletAsteroidCollision(b, a)  -- Returns true if the objects are colli
 
     if distanceSquared <= sumRadiiSquared then
         return true
-    else return false 
-
+    else 
+        return false 
     end
 end
 
