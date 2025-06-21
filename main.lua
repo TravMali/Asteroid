@@ -1,5 +1,5 @@
---Still need player and asteroid collisions. Asteroid creation for menu and levels.
---Setup up menu options bullet collisions next.
+--Still need player and asteroid collisions. Asteroid creation for menu and levels needs to be completed.
+--Need to fix bullet creation to use random shapes.
 
 --SHIP
 local Ship = {mouseX=0, mouseY=0, health=1, shipVertices = {0,0,0,0,0,0}}
@@ -56,6 +56,7 @@ love.window.setMode(w,h)
 --BUTTONS
 local buttonWidth = 120
 local buttonHeight = 30
+
 local startButton = {
   width = buttonWidth,
   height = buttonHeight,
@@ -74,6 +75,7 @@ local quitButton = {
 --GAME CONDITIONS
 local menu = false
 local level1 = false
+local initialized = false
 local win = false
 local lose = false
 --GAME CONDITIONS
@@ -82,8 +84,6 @@ local lose = false
 function love.load() -- One time setup
     menu = true
     love.mouse.setVisible(false)
-    --some things will need to be moved to another block
-    table.insert(asteroids, Asteroid:new(50,50,10))
     player = Ship:new()
     player:shipMouse()
     shots = 1 -- Preloads one shot
@@ -91,6 +91,23 @@ function love.load() -- One time setup
 end
 
 function love.update() --Updates each frame
+    if menu == true then
+        for i = #bullets, 1, -1 do
+            if bulletMenuCollision(bullets[i], startButton) then
+                level1 = true
+                menu = false
+                table.remove(bullets)
+            elseif bulletMenuCollision(bullets[i], quitButton) then
+                love.event.quit()
+            end
+        end    
+    end
+
+    if level1 == true and initialized == true and #asteroids == 0 then --Not functioning properly
+        level1 = false
+        love.event.quit()
+    end
+
     player:shipMouse()
     bulletControl()
     bulletAsteroidCollisionCheck()
@@ -104,6 +121,10 @@ function love.draw() --Draws objects in window
         displayMenu()
     end
     if level1 == true then
+        if initialized == false then
+            asteroidsLevel1()
+            initialized = true
+        end
     end
     if win == true then
     elseif lose ==true then
@@ -163,7 +184,10 @@ function shipAsteroidCollision(sx,sy,ax,ay) --Checks for collisions between the 
 end
 
 function bulletMenuCollision(b, m)
-
+    if b.x > m.x and b.x < m.x + m.width and b.y < m.y + m.height and b.y > m.y then
+        return true
+    else return false
+    end
 end
 --end controls for physics and interactions
 
@@ -199,6 +223,11 @@ function displayMenu() --Text is positioned semi-manually. Be prepared to edit i
 end
 
 function asteroidsLevel1() --Initializes the asteroids and their positions for level 1. Also controls for their movement
-level1 = true
+    for i = 1, 10 do
+        table.insert(asteroids, Asteroid:new(50 + 30 * i, 50, 10))
+    end
+    for i = 1, 10 do
+        table.insert(asteroids,Asteroid:new(65 + 30 * i, 70, 10) )
+    end
 end
 --END LEVELS
