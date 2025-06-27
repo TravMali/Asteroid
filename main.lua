@@ -80,6 +80,8 @@ local win = false
 local lose = false
 --GAME CONDITIONS
 
+dt = love.timer.getDelta()--FRAME CONTROL
+
 --LOVE
 function love.load() -- One time setup
     menu = true
@@ -103,7 +105,7 @@ function love.update() --Updates each frame
         end    
     end
 
-    if level1 == true and initialized == true and #asteroids == 0 then --Not functioning properly
+    if level1 == true and initialized == true and #asteroids == 0 then ----Not functioning properly
         level1 = false
         love.event.quit()
     end
@@ -111,7 +113,7 @@ function love.update() --Updates each frame
     player:shipMouse()
     bulletControl()
     bulletAsteroidCollisionCheck()
-    timer = timer + 1
+    timer = timer + 1 * dt                                                   -----FIX TIMING
 end
 
 function love.draw() --Draws objects in window
@@ -137,15 +139,29 @@ end
 --END LOVE
 
 --Varios controls and interactions
+function asteroidMovementM()
+
+end
+
+function asteroidMovement1()
+    for i = 1, #bullets do
+        
+    end
+end
+
+
+
+
 function bulletControl()--Bullet firing and movement
       if love.mouse.isDown(1) and shots > 0 then
-        shots = shots - 1
+        shots = 0
+        timer = 0
         table.insert(bullets, Bullet:new(player.mouseX, player.mouseY))
     end
     for i = 1, #bullets do
-        bullets[i].y = bullets[i].y-3
+        bullets[i].y = bullets[i].y-3 * dt
     end
-    if timer >= 125 and shots == 0 then
+    if timer >= 125 and shots < 1 then
         shots = shots + 1
         timer = 0
     end
