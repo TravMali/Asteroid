@@ -48,8 +48,8 @@ end
 bullets = {} --List of bullet objects
 
 --WINDOW
-local w = 768
-local h = 768
+local w = 640
+local h = 640
 love.window.setMode(w,h)
 --WINDOW
 
@@ -80,7 +80,7 @@ local win = false
 local lose = false
 --GAME CONDITIONS
 
-dt = love.timer.getDelta()--FRAME CONTROL
+
 
 --LOVE
 function love.load() -- One time setup
@@ -92,7 +92,7 @@ function love.load() -- One time setup
     timer = 0 -- Used for updating bullets
 end
 
-function love.update() --Updates each frame
+function love.update(dt) --Updates each frame
     if menu == true then
         for i = #bullets, 1, -1 do
             if bulletMenuCollision(bullets[i], startButton) then
@@ -105,15 +105,22 @@ function love.update() --Updates each frame
         end    
     end
 
-    if level1 == true and initialized == true and #asteroids == 0 then ----Not functioning properly
+    if level1 == true and initialized == false then
+        asteroidsLevel1()
+        initialized = true
+    elseif level1 == true and initialized == true and #asteroids ~= 0 then
+        asteroidMovement1(dt)
+    elseif level1 == true and initialized == true and #asteroids == 0 then ----Not functioning properly
         level1 = false
         love.event.quit()
     end
 
+
+
     player:shipMouse()
-    bulletControl()
+    bulletControl(dt)
     bulletAsteroidCollisionCheck()
-    timer = timer + 1 * dt                                                   -----FIX TIMING
+    timer = timer + 150 * dt                                                   -----FIX TIMING
 end
 
 function love.draw() --Draws objects in window
@@ -121,15 +128,9 @@ function love.draw() --Draws objects in window
 
     if menu == true then
         displayMenu()
-    end
-    if level1 == true then
-        if initialized == false then
-            asteroidsLevel1()
-            initialized = true
-        end
-    end
-    if win == true then
-    elseif lose ==true then
+    elseif level1 == true then
+    elseif win == true then
+    elseif lose == true then
     end
     love.graphics.setColor(1,1,1,1)
     love.graphics.polygon("line", player.shipVertices)
@@ -139,29 +140,36 @@ end
 --END LOVE
 
 --Varios controls and interactions
-function asteroidMovementM()
+function asteroidMovementM(dt)
 
 end
 
-function asteroidMovement1()
-    for i = 1, #bullets do
-        
+local asteroidDirectionX = 1 -- persistant storage necessary. Since Lua does not support static variables, the solution is to create a global one.
+local asteroidDirectionY = 1
+function asteroidMovement1(dt)
+    local speed = 120
+    for i = 1, #asteroids do
+        if asteroids[i].x >= w - 50 or asteroids[i].x <= 50 then
+           asteroidDirectionX = asteroidDirectionX * -1
+           for j = 1, #asteroids do
+           asteroids[j].x = asteroids[j].x + asteroidDirectionX
+           end
+        else
+        asteroids[i].x = asteroids[i].x + speed * asteroidDirectionX * dt
+        end
     end
 end
 
-
-
-
-function bulletControl()--Bullet firing and movement
+function bulletControl(dt)--Bullet firing and movement
       if love.mouse.isDown(1) and shots > 0 then
         shots = 0
         timer = 0
         table.insert(bullets, Bullet:new(player.mouseX, player.mouseY))
     end
     for i = 1, #bullets do
-        bullets[i].y = bullets[i].y-3 * dt
+        bullets[i].y = bullets[i].y-300 * dt
     end
-    if timer >= 125 and shots < 1 then
+    if timer >= 50 and shots < 1 then
         shots = shots + 1
         timer = 0
     end
@@ -199,7 +207,7 @@ function shipAsteroidCollision(sx,sy,ax,ay) --Checks for collisions between the 
     return false
 end
 
-function bulletMenuCollision(b, m)
+function bulletMenuCollision(b, m) --Bullet menu interactions
     if b.x > m.x and b.x < m.x + m.width and b.y < m.y + m.height and b.y > m.y then
         return true
     else return false
