@@ -34,7 +34,7 @@ function Asteroid.createAsteroidShape()
     return math.random(4,10)
 end
 --ASTEROIDS
-asteroids = {} --List of asteroid objects
+local asteroids = {} --List of asteroid objects
 
 --BULLETS
 local Bullet = {x=0, y=0}
@@ -45,7 +45,7 @@ function Bullet:new(locationX, locationY)
     return setmetatable(bullet, self)
 end
 --BULLETS
-bullets = {} --List of bullet objects
+local bullets = {} --List of bullet objects
 
 --WINDOW
 local w = 640
@@ -80,7 +80,11 @@ local win = false
 local lose = false
 --GAME CONDITIONS
 
-
+--VARIABLES
+local timer = 0
+local shots = 0
+local player
+--VARIABLES
 
 --LOVE
 function love.load() -- One time setup
@@ -94,11 +98,18 @@ end
 
 function love.update(dt) --Updates each frame
     if menu == true then
+        if initialized == false then
+        asteroidsSpawnM()
+        initialized = true
+        end
         for i = #bullets, 1, -1 do
             if bulletMenuCollision(bullets[i], startButton) then
                 level1 = true
                 menu = false
-                table.remove(bullets)
+                bullets = {}
+                asteroids = {}
+                initialized = false
+                break
             elseif bulletMenuCollision(bullets[i], quitButton) then
                 love.event.quit()
             end
@@ -106,7 +117,7 @@ function love.update(dt) --Updates each frame
     end
 
     if level1 == true and initialized == false then
-        asteroidsLevel1()
+        asteroidsSpawn1()
         initialized = true
     elseif level1 == true and initialized == true and #asteroids ~= 0 then
         asteroidMovement1(dt)
@@ -115,12 +126,10 @@ function love.update(dt) --Updates each frame
         love.event.quit()
     end
 
-
-
     player:shipMouse()
     bulletControl(dt)
     bulletAsteroidCollisionCheck()
-    timer = timer + 150 * dt                                                   -----FIX TIMING
+    timer = timer + 150 * dt
 end
 
 function love.draw() --Draws objects in window
@@ -137,37 +146,18 @@ function love.draw() --Draws objects in window
     drawAsteroids()
     drawBullets()
 end
---END LOVE
+--LOVE
 
---Varios controls and interactions
-function asteroidMovementM(dt)
-
-end
-
-local asteroidDirectionX = 1 -- persistant storage necessary. Since Lua does not support static variables, the solution is to create a global one.
-local asteroidDirectionY = 1
-function asteroidMovement1(dt)
-    local speed = 120
-    for i = 1, #asteroids do
-        if asteroids[i].x >= w - 50 or asteroids[i].x <= 50 then
-           asteroidDirectionX = asteroidDirectionX * -1
-           for j = 1, #asteroids do
-           asteroids[j].x = asteroids[j].x + asteroidDirectionX
-           end
-        else
-        asteroids[i].x = asteroids[i].x + speed * asteroidDirectionX * dt
-        end
-    end
-end
-
+--INTERACTIONS
 function bulletControl(dt)--Bullet firing and movement
-      if love.mouse.isDown(1) and shots > 0 then
+      local bulletSpeed = 400
+      if love.mouse.isDown(1) and shots > 0 then  
         shots = 0
         timer = 0
         table.insert(bullets, Bullet:new(player.mouseX, player.mouseY))
     end
     for i = 1, #bullets do
-        bullets[i].y = bullets[i].y-300 * dt
+        bullets[i].y = bullets[i].y - bulletSpeed * dt
     end
     if timer >= 50 and shots < 1 then
         shots = shots + 1
@@ -213,18 +203,18 @@ function bulletMenuCollision(b, m) --Bullet menu interactions
     else return false
     end
 end
---end controls for physics and interactions
+--INTERACTIONS
 
 --DRAWING FUNCTIONS
 function drawBullets()
     for i = 1, #bullets do
-        love.graphics.circle("fill", bullets[i].x, bullets[i].y, 3)
+        love.graphics.circle("fill", bullets[i].x, bullets[i].y, 5)
     end
 end
 
 function drawAsteroids()
     for i = 1, #asteroids do
-        love.graphics.circle("fill", asteroids[i].x, asteroids[i].y, asteroids[i].radius)
+        love.graphics.circle("fill", asteroids[i].x, asteroids[i].y, asteroids[i].radius, asteroids[i].shape)
     end
 end
 --END DRAWING FUNCTIONS
@@ -246,12 +236,40 @@ function displayMenu() --Text is positioned semi-manually. Be prepared to edit i
         love.graphics.print("Quit", quitButton.x + (buttonWidth/3) + quitTextOffsetX, quitButton.y + buttonHeight/3 - quitTextOffsetY)
 end
 
-function asteroidsLevel1() --Initializes the asteroids and their positions for level 1. Also controls for their movement
+
+function asteroidsSpawnM()
     for i = 1, 10 do
-        table.insert(asteroids, Asteroid:new(50 + 30 * i, 50, 10))
+        table.insert(asteroids, Asteroid:new(50+20*i, 200, 10))
+    end
+end
+
+function asteroidMovementM(dt)
+
+end
+
+function asteroidsSpawn1() --Initializes the asteroids and their positions for level 1. Also controls for their movement
+    for i = 1, 10 do
+        table.insert(asteroids, Asteroid:new(50 + 40 * i, 50, 10))
     end
     for i = 1, 10 do
-        table.insert(asteroids,Asteroid:new(65 + 30 * i, 70, 10) )
+        table.insert(asteroids,Asteroid:new(70 + 40 * i, 80, 10) )
+    end
+end
+
+local asteroidDirectionX = 1 -- persistant storage necessary. Since Lua does not support static variables, the solution is to create a global one.
+local asteroidDirectionY = 1
+function asteroidMovement1(dt)
+    local speed = 130
+    for i = 1, #asteroids do
+        if asteroids[i].x >= w - 50 or asteroids[i].x <= 50 then
+           asteroidDirectionX = asteroidDirectionX * -1
+           for j = 1, #asteroids do
+           asteroids[j].x = asteroids[j].x + asteroidDirectionX * 5
+           asteroids[j].y = asteroids[j].y + 20
+           end
+        else
+        asteroids[i].x = asteroids[i].x + speed * asteroidDirectionX * dt
+        end
     end
 end
 --END LEVELS
