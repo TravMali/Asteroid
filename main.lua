@@ -148,9 +148,9 @@ function love.draw() --Draws objects in window
 end
 --LOVE
 
---INTERACTIONS
+--INTERACTIONS/PHYSICS
 function bulletControl(dt)--Bullet firing and movement
-      local bulletSpeed = 400
+      local bulletSpeed = 800
       if love.mouse.isDown(1) and shots > 0 then  
         shots = 0
         timer = 0
@@ -203,7 +203,7 @@ function bulletMenuCollision(b, m) --Bullet menu interactions
     else return false
     end
 end
---INTERACTIONS
+--INTERACTIONS/PHYSICS
 
 --DRAWING FUNCTIONS
 function drawBullets()
